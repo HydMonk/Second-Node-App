@@ -20,7 +20,7 @@ jobs:
 
       - name: Run Semgrep (free, local scan)
         run: |
-          semgrep --config=auto --sarif --output=semgrep.sarif || true
+          semgrep --config=auto --sarif --output=semgrep1.sarif || true
 
       #- name: Upload Semgrep findings as artifact
         #uses: actions/upload-artifact@v4
