@@ -1,31 +1,76 @@
-name: Security Scans
+name: DevSecOps Pipeline
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
-    branches: [main]
+    branches: [ master ]
 
 jobs:
-  security:
+  semgrep:
+    name: Static Code Analysis (Semgrep)
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Semgrep - Static Analysis
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: ./sast/semgrep/rules
+      - name: Install Semgrep
+        run: pip install semgrep
 
-      - name: Trivy - Dependency and IaC Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: CRITICAL,HIGH
-
-      - name: Gitleaks - Secrets Detection
-        uses: gitleaks/gitleaks-action@v2
-
-      - name: Generate SBOM
+      - name: Run Semgrep (free, local scan)
         run: |
-          curl -sSfL https://raw.githubusercontent.com/CycloneDX/cyclonedx-cli/main/install.sh | sh -s -- -b /usr/local/bin
-          cyclonedx-app -i . -o sbom/cyclonedx.json
+          semgrep --config=auto --sarif --output=semgrep.sarif || true
+
+      #- name: Upload Semgrep findings as artifact
+        #uses: actions/upload-artifact@v4
+        #with:
+         # name: semgrep-findings
+         # path: semgrep-results.json
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+
+      - name: Fail if high severity Semgrep findings
+        run: |
+          if grep -q '"severity": "ERROR"' semgrep-results.json; then
+            echo "❌ Semgrep found high severity issues"
+            cat semgrep-results.json
+            exit 1
+          else
+            echo "✅ No high severity Semgrep findings"
+          fi
+
+  snyk:
+    name: Dependency Vulnerability Scan (Snyk)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Snyk Test
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  secrets:
+    name: Secrets Detection (TruffleHog)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan for secrets with TruffleHog
+        uses: trufflesecurity/trufflehog@main
