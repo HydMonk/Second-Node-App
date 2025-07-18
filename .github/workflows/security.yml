@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # This ensures full commit history is available
 
       - name: Install Semgrep
         run: pip install semgrep
@@ -78,6 +76,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # This ensures full commit history is available
 
       - name: Scan for secrets with TruffleHog
         uses: trufflesecurity/trufflehog@main
