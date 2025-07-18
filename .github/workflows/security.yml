@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-         with:
+        with:
           fetch-depth: 0  # This ensures full commit history is available
 
       - name: Install Semgrep
