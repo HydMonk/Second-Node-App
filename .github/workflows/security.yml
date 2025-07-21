@@ -66,8 +66,26 @@ jobs:
 
       - name: Run Snyk Test
         uses: snyk/actions/node@master
+        with:
+          command: test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      
+      - name: Snyk scan (client)
+        uses: snyk/actions/node@v1
+        with:
+          command: test
+          project: client
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk scan (server)
+        uses: snyk/actions/node@v1
+        with:
+          command: test
+          project: server
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}      
 
   secrets:
     name: Secrets Detection (TruffleHog)
