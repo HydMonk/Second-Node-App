@@ -56,28 +56,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Snyk Test
-        uses: snyk/actions/node@master
-        with:
-          command: test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      
-      - name: Snyk scan (client)
-        uses: snyk/actions/node@master
-        with:
-          command: test
-          entryPoint: client
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Install Snyk CLI
+        run: npm install -g snyk
 
-      - name: Snyk scan (server)
-        uses: snyk/actions/node@master
-        with:
-          command: test
-          entryPoint: server
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}      
+      - name: Authenticate with Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk test (root)
+        run: snyk test
+
+      - name: Snyk test (client/)
+        run: snyk test
+        working-directory: client
+
+      - name: Snyk test (server/)
+        run: snyk test
+        working-directory: server   
 
   secrets:
     name: Secrets Detection (TruffleHog)
