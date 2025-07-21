@@ -75,7 +75,7 @@ jobs:
         uses: snyk/actions/node@master
         with:
           command: test
-          project: client
+          entryPoint: client
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -83,7 +83,7 @@ jobs:
         uses: snyk/actions/node@master
         with:
           command: test
-          project: server
+          entryPoint: server
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}      
 
