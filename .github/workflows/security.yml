@@ -72,7 +72,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       
       - name: Snyk scan (client)
-        uses: snyk/actions/node@v1
+        uses: snyk/actions/node@master
         with:
           command: test
           project: client
@@ -80,7 +80,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk scan (server)
-        uses: snyk/actions/node@v1
+        uses: snyk/actions/node@master
         with:
           command: test
           project: server
