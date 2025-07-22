@@ -48,6 +48,13 @@ jobs:
             echo "✅ No high severity Semgrep findings"
           fi
 
+      - name: Archive reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            semgrep1.sarif 
+
   snyk:
     name: Dependency Vulnerability Scan (Snyk)
     runs-on: ubuntu-latest
@@ -71,7 +78,16 @@ jobs:
 
       - name: Snyk test (server/)
         run: snyk test --json > snyk-results-server.json
-        working-directory: server   
+        working-directory: server  
+
+      - name: Archive reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            snyk-results-server.json
+            snyk-results-client.json
+            snyk-results-root.json
 
   secrets:
     name: Secrets Detection (TruffleHog)
@@ -86,13 +102,3 @@ jobs:
       - name: Scan for secrets with TruffleHog
         uses: trufflesecurity/trufflehog@main
 
-  Archive:
-    name: Archive reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: security-reports
-        path: |
-          snyk-results-server.json
-          snyk-results-client.json
-          snyk-results-root.json
-          semgrep1.sarif
