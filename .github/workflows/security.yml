@@ -63,14 +63,14 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk test (root)
-        run: snyk test
+        run: snyk test --json > snyk-results-root.json
 
       - name: Snyk test (client/)
-        run: snyk test
+        run: snyk test --json > snyk-results-client.json
         working-directory: client
 
       - name: Snyk test (server/)
-        run: snyk test
+        run: snyk test --json > snyk-results-server.json
         working-directory: server   
 
   secrets:
@@ -85,3 +85,14 @@ jobs:
 
       - name: Scan for secrets with TruffleHog
         uses: trufflesecurity/trufflehog@main
+
+  Archive:
+    - name: Archive reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          snyk-results-server.json
+          snyk-results-client.json
+          snyk-results-root.json
+          semgrep1.sarif
